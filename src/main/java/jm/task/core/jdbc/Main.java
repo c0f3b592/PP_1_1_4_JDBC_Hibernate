@@ -18,7 +18,7 @@ public class Main {
         service.saveUser("C", "Cc", (byte) 34);
         service.saveUser("qwe", "Dd", (byte) 56);
         for (User user : service.getAllUsers()) {
-            System.out.println(user.toString());
+            System.out.println(user);
         }
         service.cleanUsersTable();
         service.dropUsersTable();
