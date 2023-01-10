@@ -25,9 +25,7 @@ public class UserDaoHibernateImpl implements UserDao {
                 "    age tinyint,\n" +
                 "    primary key (id))";
         try (Session session = sessionFactory.openSession()) {
-            Transaction transaction = session.beginTransaction();
             session.createSQLQuery(createTableUsersSQL).executeUpdate();
-            transaction.commit();
         } catch (Exception e) {
             if (e.getCause().getClass() == SQLGrammarException.class) {
                 if (((SQLGrammarException) e.getCause()).getErrorCode() != MysqlErrorNumbers.ER_TABLE_EXISTS_ERROR) {
@@ -41,9 +39,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         String dropTableUsersSQL = "drop table users";
         try (Session session = sessionFactory.openSession()) {
-            Transaction transaction = session.beginTransaction();
             session.createSQLQuery(dropTableUsersSQL).executeUpdate();
-            transaction.commit();
         } catch (Exception e) {
             if (e.getCause().getClass() == SQLGrammarException.class) {
                 if (((SQLGrammarException) e.getCause()).getErrorCode() != MysqlErrorNumbers.ER_BAD_TABLE_ERROR) {
@@ -89,15 +85,9 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         String getAllUsersHQL = "select user from User user";
         List<User> list = new ArrayList<>();
-        Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
-            transaction = session.beginTransaction();
             list = session.createQuery(getAllUsersHQL, User.class).getResultList();
-            transaction.commit();
         } catch (HibernateException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
             e.printStackTrace();
         }
         return list;
