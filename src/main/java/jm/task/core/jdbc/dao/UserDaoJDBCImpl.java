@@ -88,7 +88,6 @@ public class UserDaoJDBCImpl implements UserDao {
         String getAllUsersSQL = "select * from users";
         try (Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery(getAllUsersSQL);
-            connection.commit();
             List<User> list = new ArrayList<>();
             while (resultSet.next()) {
                 Long id = resultSet.getLong("id");
@@ -102,11 +101,6 @@ public class UserDaoJDBCImpl implements UserDao {
             return list;
         } catch (SQLException e) {
             e.printStackTrace();
-            try {
-                connection.rollback();
-            } catch (SQLException rollbackEx) {
-                rollbackEx.printStackTrace();
-            }
         }
         return null;
     }
