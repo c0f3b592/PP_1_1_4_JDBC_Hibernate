@@ -2,15 +2,8 @@ package jm.task.core.jdbc.dao;
 
 import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import jm.task.core.jdbc.model.User;
-import org.hibernate.JDBCException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import org.hibernate.*;
 import org.hibernate.exception.SQLGrammarException;
-import org.hibernate.jdbc.Work;
-
-import javax.persistence.PersistenceException;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +18,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        String createTableUsersSQL = "create table schema1_1_5.users (\n" +
+        String createTableUsersSQL = "create table users (\n" +
                 "    id bigint auto_increment,\n" +
                 "    name varchar(255),\n" +
                 "    lastName varchar(255),\n" +
@@ -46,7 +39,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
-        String dropTableUsersSQL = "drop table schema1_1_5.users";
+        String dropTableUsersSQL = "drop table users";
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
             session.createSQLQuery(dropTableUsersSQL).executeUpdate();
@@ -62,14 +55,12 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        String saveUsersSQL = "insert into schema1_1_5.users (name, lastName, age)\n" +
-                "values ('" + name + "', '" + lastName + "', " + age + ")";
         Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
-            session.createSQLQuery(saveUsersSQL).executeUpdate();
+            session.save(new User(name, lastName, age));
             transaction.commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -79,13 +70,13 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        String removeUserByIdSQL = "delete from schema1_1_5.users where id=" + id;
+        String removeUserByIdHQL = "delete from User where id = :id";
         Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
-            session.createSQLQuery(removeUserByIdSQL).executeUpdate();
+            session.createQuery(removeUserByIdHQL).setParameter("id", id).executeUpdate();
             transaction.commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -95,19 +86,14 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        String getAllUsersSQL = "select * from schema1_1_5.users";
+        String getAllUsersHQL = "select user from User user";
         List<User> list = new ArrayList<>();
         Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
-            List<Object[]> rows = session.createSQLQuery(getAllUsersSQL).list();
-
-            for (Object[] row : rows) {
-                User user = new User(row[1].toString(), row[2].toString(), Byte.decode(row[3].toString()));
-                list.add(user);
-            }
+            list = session.createQuery(getAllUsersHQL, User.class).getResultList();
             transaction.commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -118,13 +104,13 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void cleanUsersTable() {
-        String cleanUsersTableSQL = "delete from schema1_1_5.users";
         Transaction transaction = null;
+        String cleanUsersTableHQL = "delete from User a";
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
-            session.createSQLQuery(cleanUsersTableSQL).executeUpdate();
+            session.createQuery(cleanUsersTableHQL).executeUpdate();
             transaction.commit();
-        } catch (Exception e) {
+        } catch (HibernateException e) {
             if (transaction != null) {
                 transaction.rollback();
             }

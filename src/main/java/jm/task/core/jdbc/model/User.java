@@ -1,15 +1,12 @@
 package jm.task.core.jdbc.model;
 
-import org.hibernate.annotations.Entity;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table
+@Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
@@ -64,7 +61,21 @@ public class User {
     }
 
     public String toString() {
-        StringBuilder s = new StringBuilder();
-        return s.append(name).append(" ").append(lastName).append(" ").append(age).toString();
+        return (new StringBuilder())
+                .append(User.class.getSimpleName())
+                .append("{")
+                .append("id=")
+                .append(id)
+                .append(", ")
+                .append("name=")
+                .append(name)
+                .append(", ")
+                .append("lastName=")
+                .append(lastName)
+                .append(", ")
+                .append("age=")
+                .append(age)
+                .append("}")
+                .toString();
     }
 }
