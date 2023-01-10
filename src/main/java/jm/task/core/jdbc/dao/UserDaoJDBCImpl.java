@@ -15,11 +15,18 @@ public class UserDaoJDBCImpl implements UserDao {
     public UserDaoJDBCImpl() {}
 
     public UserDaoJDBCImpl(Connection connection) {
+
         this.connection = connection;
+        try {
+            connection.setAutoCommit(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void createUsersTable() {
-        String createTableUsersSQL = "create table schema1_1_4.users (\n" +
+        String createTableUsersSQL = "create table users (\n" +
                 "    id bigint auto_increment,\n" +
                 "    name varchar(255),\n" +
                 "    lastName varchar(255),\n" +
@@ -35,7 +42,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        String dropTableUsersSQL = "drop table schema1_1_4.users";
+        String dropTableUsersSQL = "drop table users";
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(dropTableUsersSQL);
         } catch (SQLException e) {
@@ -46,49 +53,76 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        String saveUsersSQL = "insert into schema1_1_4.users (name, lastName, age)\n" +
+        String saveUsersSQL = "insert into users (name, lastName, age)\n" +
                     "values ('" + name + "', '" + lastName + "', " + age + ")";
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(saveUsersSQL);
+            connection.commit();
             System.out.println("User с именем – " + name + " добавлен в базу данных");
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
         }
     }
 
     public void removeUserById(long id) {
-        String removeUserByIdSQL = "delete from schema1_1_4.users where id=" + id;
+        String removeUserByIdSQL = "delete from users where id=" + id;
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(removeUserByIdSQL);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
         }
     }
 
     public List<User> getAllUsers() {
-        String getAllUsersSQL = "select * from schema1_1_4.users";
+        String getAllUsersSQL = "select * from users";
         try (Statement statement = connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery(getAllUsersSQL);
+            connection.commit();
             List<User> list = new ArrayList<>();
             while (resultSet.next()) {
+                Long id = resultSet.getLong("id");
                 String name = resultSet.getString("name");
                 String lastName = resultSet.getString("lastName");
                 byte age = resultSet.getByte("age");
-                list.add(new User(name, lastName, age));
+                User user = new User(name, lastName, age);
+                user.setId(id);
+                list.add(user);
             }
             return list;
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
         }
         return null;
     }
 
     public void cleanUsersTable() {
-        String cleanUsersTableSQL = "delete from schema1_1_4.users";
+        String cleanUsersTableSQL = "delete from users";
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(cleanUsersTableSQL);
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
         }
     }
 }

@@ -61,7 +61,21 @@ public class User {
     }
 
     public String toString() {
-        StringBuilder s = new StringBuilder();
-        return s.append(name).append(" ").append(lastName).append(" ").append(age).toString();
+        return (new StringBuilder())
+                .append(User.class.getSimpleName())
+                .append("{")
+                .append("id=")
+                .append(id)
+                .append(", ")
+                .append("name=")
+                .append(name)
+                .append(", ")
+                .append("lastName=")
+                .append(lastName)
+                .append(", ")
+                .append("age=")
+                .append(age)
+                .append("}")
+                .toString();
     }
 }
