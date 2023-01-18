@@ -2,7 +2,11 @@ package jm.task.core.jdbc.dao;
 
 import com.mysql.cj.exceptions.MysqlErrorNumbers;
 import jm.task.core.jdbc.model.User;
-import org.hibernate.*;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.exception.SQLGrammarException;
 import java.util.ArrayList;
 import java.util.List;
