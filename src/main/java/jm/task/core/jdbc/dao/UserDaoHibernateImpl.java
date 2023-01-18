@@ -24,13 +24,25 @@ public class UserDaoHibernateImpl implements UserDao {
                 "    lastName varchar(255),\n" +
                 "    age tinyint,\n" +
                 "    primary key (id))";
+        Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
             session.createSQLQuery(createTableUsersSQL).executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
-            if (e.getCause().getClass() == SQLGrammarException.class) {
-                if (((SQLGrammarException) e.getCause()).getErrorCode() != MysqlErrorNumbers.ER_TABLE_EXISTS_ERROR) {
+            if (e.getCause() != null) {
+                if (e.getCause().getClass() == SQLGrammarException.class) {
+                    if (((SQLGrammarException) e.getCause()).getErrorCode() != MysqlErrorNumbers.ER_TABLE_EXISTS_ERROR) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    if (transaction != null) {
+                        transaction.rollback();
+                    }
                     e.printStackTrace();
                 }
+            } else {
+                e.printStackTrace();
             }
         }
     }
@@ -38,13 +50,25 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void dropUsersTable() {
         String dropTableUsersSQL = "drop table users";
+        Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
             session.createSQLQuery(dropTableUsersSQL).executeUpdate();
+            transaction.commit();
         } catch (Exception e) {
-            if (e.getCause().getClass() == SQLGrammarException.class) {
-                if (((SQLGrammarException) e.getCause()).getErrorCode() != MysqlErrorNumbers.ER_BAD_TABLE_ERROR) {
+            if (e.getCause() != null) {
+                if (e.getCause().getClass() == SQLGrammarException.class) {
+                    if (((SQLGrammarException) e.getCause()).getErrorCode() != MysqlErrorNumbers.ER_BAD_TABLE_ERROR) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    if (transaction != null) {
+                        transaction.rollback();
+                    }
                     e.printStackTrace();
                 }
+            } else {
+                e.printStackTrace();
             }
         }
     }
